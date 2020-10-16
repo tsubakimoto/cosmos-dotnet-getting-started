@@ -4,10 +4,30 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CosmosGettingStartedTutorial
 {
     class Program
+    {
+        // <Main>
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+        // </Main>
+
+        static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddHostedService<Worker>();
+                });
+    }
+
+    public class Worker : IHostedService
     {
         // The Azure Cosmos DB endpoint for running this sample.
         private static readonly string EndpointUri = ConfigurationManager.AppSettings["EndPointUri"];
@@ -28,14 +48,31 @@ namespace CosmosGettingStartedTutorial
         private string databaseId = "FamilyDatabase";
         private string containerId = "FamilyContainer";
 
-        // <Main>
-        public static async Task Main(string[] args)
+        private readonly IHostApplicationLifetime appLifeTime;
+
+        public Worker(IHostApplicationLifetime appLifeTime)
+        {
+            this.appLifeTime = appLifeTime;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            appLifeTime.ApplicationStarted.Register(Main);
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public void Main()
         {
             try
             {
                 Console.WriteLine("Beginning operations...\n");
-                Program p = new Program();
-                await p.GetStartedDemoAsync();
+                GetStartedDemoAsync().GetAwaiter().GetResult();
 
             }
             catch (CosmosException de)
@@ -47,13 +84,7 @@ namespace CosmosGettingStartedTutorial
             {
                 Console.WriteLine("Error: {0}", e);
             }
-            finally
-            {
-                Console.WriteLine("End of demo, press any key to exit.");
-                Console.ReadKey();
-            }
         }
-        // </Main>
 
         // <GetStartedDemoAsync>
         /// <summary>
