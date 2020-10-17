@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IEvangelist.Azure.CosmosRepository" Version="2.0.2" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.14.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.9" />
   </ItemGroup>

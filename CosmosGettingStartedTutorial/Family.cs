@@ -1,11 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Azure.CosmosRepository;
+using Microsoft.Azure.CosmosRepository.Attributes;
+using Newtonsoft.Json;
 
 namespace CosmosGettingStartedTutorial
 {
-    public class Family
+    [PartitionKeyPath("/LastName")]
+    public class Family : Item
     {
+/*
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
+*/
         public string LastName { get; set; }
         public Parent[] Parents { get; set; }
         public Child[] Children { get; set; }
@@ -15,6 +20,8 @@ namespace CosmosGettingStartedTutorial
         {
             return JsonConvert.SerializeObject(this);
         }
+
+        protected override string GetPartitionKeyValue() => LastName;
     }
 
     public class Parent
